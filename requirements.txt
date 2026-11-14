@@ -1,0 +1,24 @@
+# video-gen engine. Pinned to the versions the first full build ran on (Python 3.13).
+# Used directly: manimgx (scenes), numpy (music, mix, glows), pillow (stills, glows).
+manimgx==0.1.1
+numpy==2.5.4
+pillow==13.0.0
+# manimgx's own dependencies, pinned for a repeatable install
+annotated-doc==0.0.6
+annotated-types==0.8.0
+isosurfaces==0.1.2
+manimgx-fonts==2026.9.26.post1
+manimgx-fonts-cjk==2026.9.26.post1
+markdown-it-py==4.3.0
+mdurl==0.1.2
+networkx==3.7
+pydantic==2.14.3
+pydantic_core==2.50.4
+Pygments==2.21.0
+rich==15.0.0
+shellingham==1.5.4
+skia-pathops==0.9.2
+svgelements==1.9.6
+typer==0.29.1
+typing_extensions==4.16.0
+typing-inspection==0.4.5

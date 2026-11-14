@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+# outputs never belong in the repo
+*.mp4
+*.wav
+*.mov
+*.tmp.*
+frames/
+scenes/
+out/
+audio/
