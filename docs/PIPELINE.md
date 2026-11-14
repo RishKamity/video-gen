@@ -31,7 +31,7 @@ Save the text of every source as one Markdown file in `sources/` (`sources/noaa_
 - `script/claims.md`: one row per factual or numeric claim with an exact quote from `sources/` or the URL opened.
 
 ```bash
-$PY $VG $P estimate          # words and estimated minutes per chapter (within ~2% on the first build)
+$PY $VG $P estimate          # words and estimated minutes per chapter (within ~2% so far); flags stale cue phrases
 $PY $VG $P claims            # every quote must be found in its source file; exit 1 lists the misses
 $PY $VG $P leakcheck SAMPLE  # course packs only: nothing may share wording or numbers with the sealed sample exam
 ```
@@ -52,7 +52,7 @@ For each listed segment: one `mcp__Speko__audio_synthesize` call with the body s
 $PY $VG $P ch1 timing
 ```
 
-Measures every WAV with ffprobe and writes `script/ch1_timing.json` (scenes, segment starts, caption chunks) and `out/<OUT_NAME>.srt`. Re-run it after any narration change: cues, captions and the audio mix all follow the new timing. It also notes scene keys that have no scene class yet.
+Measures every WAV with ffprobe and writes `script/ch1_timing.json` (scenes, segment starts, caption chunks) and `out/<OUT_NAME>.srt`. Re-run it after any narration change: cues, captions and the audio mix all follow the new timing. It also notes scene keys that have no scene class yet, and every `self.at(N, "phrase")` in the chapter file whose segment or phrase is not in the script (the same check `estimate` runs).
 
 ## 5. Scenes
 
@@ -132,7 +132,7 @@ Environment variables: `VG_VENV` (setup.sh's venv folder), `VG_CACHE` (where the
 
 ## Troubleshooting
 
-- `phrase '...' not in segment N`: the phrase passed to `self.at` is not in that segment's `say` or `cap` (case is ignored). Use words that are really there.
+- `phrase '...' not in segment N`: the phrase passed to `self.at` is not in that segment's `say` or `cap` (case is ignored). Use words that are really there. `estimate` and `timing` list these (`cue: ...` lines) before anything is drawn; run `estimate` again after every wording change, since fact-check edits often break cue phrases.
 - `animations run to X s, past the scene end`: a scene's animations outlast its narration. Shorten run times or cue earlier.
 - `Object ... cannot be converted to an animation`: a mobject was passed to `cue` instead of an animation; wrap it, as in `m.FadeIn(tag)`.
 - Frame-count mismatch in `check`: re-render that scene; if it persists, the scene file is older than the timing (run `render-all`).

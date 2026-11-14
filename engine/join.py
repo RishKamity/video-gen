@@ -112,7 +112,8 @@ def join():
 def write_script(files, offs):
     root = project.root()
     cfg = project.config()
-    out = [f"# {cfg.get('title', 'Video')}: full narration script", "",
+    vt = cfg.get("title", "Video")
+    out = [f"# {vt}{' —' if vt[-1:] in '?!.' else ':'} full narration script", "",
            "Every chapter in order: narration as captioned, the recall questions, and every source used, combined.", ""]
     srcs, nseg = {}, 0
     for (ch, f), off in zip(files, offs):

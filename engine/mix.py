@@ -3,6 +3,9 @@
 Levels: voice normalised to VOICE_LUFS; the bed is set MUSIC_BELOW dB under the voice (integrated
 loudness) and ducked a further DUCK_DB while someone is speaking; the sting plays on the title card
 STING_LUFS_BELOW dB under the voice level. Stems are written next to the mix so `check` can measure them.
+The voice is mono but plays on both channels, so it is measured (and its stem written) as stereo: a mono
+file measures 3 dB quieter than the same signal on two channels, which made the real voice-to-bed gap
+3 dB wider than the number reported.
 """
 import re
 import subprocess
@@ -67,12 +70,13 @@ def build(ch):
             j = min(n, i + len(x))
             voice[i:j] += x[: j - i]
             speaking[i:j] = 1.0
-    write_wav(adir / f"{ch}_voice_raw.wav", voice)
+    write_wav(adir / f"{ch}_voice_raw.wav", np.stack([voice, voice], axis=1))   # as it plays: both channels
     g = db(VOICE_LUFS - lufs(adir / f"{ch}_voice_raw.wav"))
     voice *= g
-    # soft limiter for speech peaks above 0.7 (keeps loudness, avoids scaling the whole mix down)
-    over = np.abs(voice) > 0.7
-    voice[over] = np.sign(voice[over]) * (0.7 + 0.27 * np.tanh((np.abs(voice[over]) - 0.7) / 0.27))
+    # soft limiter for speech peaks above 0.6, ceiling 0.76: below the 0.79 mix cap, so the cap does not
+    # scale the whole mix (and the voice) down and the voice stays at VOICE_LUFS
+    over = np.abs(voice) > 0.6
+    voice[over] = np.sign(voice[over]) * (0.6 + 0.16 * np.tanh((np.abs(voice[over]) - 0.6) / 0.16))
 
     # music bed: starts under the end of the title card, fades out at the end
     has_title = bool(t["scenes"]) and not t["scenes"][0]["segments"]
@@ -107,7 +111,7 @@ def build(ch):
         mix *= 0.79 / peak
         voice *= 0.79 / peak
         bed *= 0.79 / peak
-    write_wav(adir / f"{ch}_stem_voice.wav", voice)
+    write_wav(adir / f"{ch}_stem_voice.wav", np.stack([voice, voice], axis=1))
     write_wav(adir / f"{ch}_stem_bed.wav", bed)
     write_wav(adir / f"{ch}_mix.wav", mix)
     for f in ("voice_raw", "bed_raw", "sting_raw"):

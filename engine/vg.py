@@ -2,7 +2,7 @@
 """video-gen: build narrated, animated explainer videos. Run with the venv's Python (setup.sh).
 
   vg.py init <project> [--title T]          new project folder (templates, folders, project.json)
-  vg.py <project> estimate                  words and estimated minutes per chapter
+  vg.py <project> estimate                  words and estimated minutes per chapter; flags stale cue phrases
   vg.py <project> claims                    check script/claims.md quotes against sources/ (exit 1 if any missing)
   vg.py <project> leakcheck <file>          flag narration/on-screen text sharing 6 words or a number with <file>
   vg.py <project> chN voice-todo            segments still without audio/chN/NNN.wav, with the text to send
@@ -114,6 +114,40 @@ def scene_names_in_file(ch):
     return names
 
 
+def cue_problems(ch, segs=None):
+    """self.at(N, "phrase") calls in chapters/chN.py whose segment or phrase is not in the script.
+
+    Read with ast, so it works before any narration exists (estimate) and after (timing). Only literal
+    arguments are checked; a stale phrase would otherwise fail only at stills or render time."""
+    f = project.chapter_file(ch)
+    if not f.exists():
+        return []
+    segs = {s["id"]: s for s in (segs or project.segments(ch))}
+    out = []
+    for node in ast.walk(ast.parse(f.read_text())):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "at"
+                and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, int)):
+            continue
+        sid = node.args[0].value
+        if sid not in segs:
+            out.append(f"chapters/{ch}.py line {node.lineno}: segment {sid} is not in script/{ch}_segments.py")
+            continue
+        if len(node.args) > 1 and isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str):
+            ph = node.args[1].value.lower()
+            s = segs[sid]
+            if ph not in s["say"].lower() and ph not in s.get("cap", s["say"]).lower():
+                out.append(f"chapters/{ch}.py line {node.lineno}: phrase {node.args[1].value!r} "
+                           f"is not in segment {sid}'s say or cap")
+    return out
+
+
+def report_cues(ch, segs=None):
+    probs = cue_problems(ch, segs)
+    for p in probs:
+        print(f"cue: {p}")
+    return probs
+
+
 def missing_wavs(ch, segs):
     out = []
     for s in segs:
@@ -155,6 +189,7 @@ def cmd_timing(ch):
     lacking = [s["name"] for s in t["scenes"] if s["name"] not in defined]
     if lacking:
         print(f"note: chapters/{ch}.py has no scene class yet for: {', '.join(lacking)}")
+    report_cues(ch, segs)
 
 
 def child_env():
@@ -296,6 +331,9 @@ def main(argv):
         if cmd == "estimate":
             import estimate
             estimate.run()
+            for c in project.chapters():
+                if (project.root() / "script" / f"{c}_segments.py").exists():
+                    report_cues(c)
         elif cmd == "claims":
             import claims
             return claims.run()

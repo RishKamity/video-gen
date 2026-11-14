@@ -1,6 +1,6 @@
 # Lessons from the builds (do not repeat these)
 
-From the first full build (a 29-minute, 8-chapter explainer: 204 narrated segments, about 1,760 seconds of video) and from packaging and testing this engine.
+From the first full build (a 29-minute, 8-chapter explainer: 204 narrated segments, about 1,760 seconds of video), from packaging and testing this engine, and from the second build (below).
 
 ## Rendering
 
@@ -39,6 +39,14 @@ From the first full build (a 29-minute, 8-chapter explainer: 204 narrated segmen
 - Characters standing low collide with the source tag (bottom right, just above the caption band). With a source tag on screen, keep feet above about y = -2.3.
 - `stills --layout` (ManimGX's inspect) flags clipped content, overlapping text and tiny labels. Its findings are advisory: Chip's badge, for instance, is always reported as small text.
 - In a project's `characters.py`, define every character class before the line that picks `LEAD, CHECK`.
+
+## From the second build (a 74-second, one-chapter demo: examples/hash-functions)
+
+- **The voice-to-bed gap was really 25 dB, not 22.** The voice stem was written and measured mono, but it plays on both channels, and a mono file measures 3 dB quieter than the same signal on two channels. The mix now measures the voice as stereo. The soft limiter's ceiling (0.97) was also above the 0.79 mix-peak cap, so the cap scaled the whole mix down and the voice ended near -17.8 instead of -16 LUFS; the limiter now starts at 0.6 with a ceiling of 0.76 (it touched 0.13% of samples on this build).
+- **Fact-check edits broke three cue phrases** (the narration changed, the `self.at(...)` phrases did not), which would only have failed at render time. `estimate` and `timing` now list every stale cue phrase.
+- **Short videos have a lot of fixed time.** The 75-second target held 142 words, not the ~180 that 146 words a minute suggests; `estimate` was within 1.2% of the measured length.
+- **Reveals near the end of a scene's last segment flash by.** On the first stills, a source tag and a note cued on the last words of a scene were visible for under half a second before the stage faded. Cue tags and notes at the start of the segment they belong to.
+- **Sources may only be readable through a fetch tool** (the build machine's proxy refused every source site). Save the exact sentences the fetch tool returns, say so at the top of the source file, and keep claim quotes to those sentences.
 
 ## Testing without voice credits
 

@@ -6,6 +6,7 @@ timing` re-times the whole chapter.
 """
 import json
 import math
+import pathlib
 import re
 import subprocess
 
@@ -97,6 +98,13 @@ def build_timing(chapter, segments, title=("sc00_title", 4.0)):
             order.append(s["scene"])
         scenes[s["scene"]].append(s)
 
+    def wav_rel(w):
+        """The WAV's path relative to the project, so the json holds no machine-specific folder."""
+        try:
+            return str(pathlib.Path(w).resolve().relative_to(project.root().resolve()))
+        except ValueError:
+            return str(w)
+
     out = {"chapter": chapter, "fps": FPS, "scenes": []}
     t_abs = 0.0
     if title:
@@ -111,7 +119,7 @@ def build_timing(chapter, segments, title=("sc00_title", 4.0)):
             start = fr(t)
             cap = s.get("cap", s["say"])
             segs.append({"id": s["id"], "start": start, "dur": round(dur, 3), "abs": round(t_abs + start, 4),
-                         "wav": str(wav), "say": s["say"], "cap": cap,
+                         "wav": wav_rel(wav), "say": s["say"], "cap": cap,
                          "chunks": caption_times(chunk_caption(cap), dur)})
             t = start + dur + GAP + s.get("pause", 0.0)
         dur = fr(t - GAP + PAD_OUT + 0.0001)

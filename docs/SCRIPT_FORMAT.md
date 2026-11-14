@@ -88,6 +88,7 @@ Captions are generated from `cap` (or `say`) and burnt in, and the same chunks g
 - Keep the source's conclusions and bluntness. When something is secondhand, a guess or unverified, say so in words ("one report says", "nobody has tested this").
 - Quotes from sources: under 15 words, attributed, with a source tag on screen.
 - Puck speaks about 160 words a minute; a chapter with title card, gaps and recall pauses runs at about 146 words a minute. `estimate` gives each chapter's length from the script.
+- Short chapters run slower than that: every chapter carries about 15 s of fixed time (the 4 s title card, two 3 s recall countdowns, about 0.7 s per scene and 1 s per segment). A 75-second chapter holds only about 140 words (115 words a minute). Write to `estimate`, not to a word count.
 
 ## Recall questions
 

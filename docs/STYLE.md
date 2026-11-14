@@ -76,7 +76,7 @@ All music is generated in code (`engine/music.py`), nothing downloaded:
 
 - A soft lo-fi bed (Fmaj7, Em7, Dm7, Cmaj7 at 78 bpm: electric piano, pad, round bass, quiet brushed ticks) at **22 dB under the voice** (integrated loudness; never less than 18), ducked another 4 dB while someone speaks, fading in under the end of the title card and out over the last 3 seconds.
 - A short bell sting (C major arpeggio with a soft low hit) on each title card, 4 dB under the voice level.
-- Voice normalised to -16 LUFS, soft-limited above 0.7, mix peak at most 0.79.
+- Voice normalised to -16 LUFS as it plays (on both channels), soft-limited above 0.6 with a ceiling of 0.76 so the mix-peak cap (0.79) never pulls the whole mix down.
 
 ## Characters
 
